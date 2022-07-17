@@ -15,8 +15,8 @@ app.get("/", (req, res) => {
   res.send("hello express!")
 })
 
-
 // 文件上传 中间件
+let uploadFiles = []
 const upload = multer({
   storage: multer.diskStorage({
     destination: function (req, file, cb) {
@@ -27,12 +27,12 @@ const upload = multer({
       const fileName = new Date().getTime() + originalname
       const previewPath = `http://2e48982a.cpolar.cn/upload/${fileName}`
       const previewPathLocal = `http://localhost:3000/upload/${fileName}`
-      req.body.fileInfo = {
+      uploadFiles.push({
         fileName,
         previewPath,
         previewPathLocal,
         ...file,
-      }
+      })
 
       cb(null, fileName)
     }
@@ -40,10 +40,15 @@ const upload = multer({
 })
 
 
-
 // 文件上传
-app.post("/file/upload", upload.single("fileTag"), (req, res) => {
-  res.json(req.body.fileInfo)
+app.post("/file/upload", upload.array("fileTags"), (req, res) => {
+  const data = JSON.parse(JSON.stringify(uploadFiles));
+  uploadFiles =[];
+  res.json({
+    code: 200,
+    message: "上传成功",
+    data: data,
+  })
 })
 
 app.listen("3000", () => {
